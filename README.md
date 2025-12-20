@@ -33,7 +33,6 @@
    ```
    GROQ_API_KEY="your_groq_api_key_here"
    ```
-   > ⚠️ Do **not** commit your `.env` or API keys. `.gitignore` already includes `.env`, but double-check before committing.
 
 3. Run the agent:
    ```bash
@@ -91,12 +90,3 @@
 ## Contributing & License
 - Contributions welcome — open issues or PRs with improvements (prompts, tools, tests).
 - Add a license file (e.g., `MIT`) if you want to mark usage terms.
-
----
-
-If you want, I can:
-- ✅ Add a short `examples/` folder with sample prompts and output,
-- ✅ Add a wrapper script (e.g., `run_example.sh`) for reproducible runs,
-- ✅ Add basic tests or a CI job to validate generated project structure.
-
-Which of the above would you like me to do next?
