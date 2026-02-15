@@ -1,92 +1,124 @@
-# Autocoder — AI-powered autonomous coding agent 🚀
+# Autocoder — Full‑Stack Agentic Coding Platform
 
-**Autocoder** is an experimental agent that converts a natural-language project request into a runnable code project. It uses a three-stage pipeline (Planner → Architect → Coder) to create a structured plan, break it down into implementable tasks, and then implement files using tool-backed LLM agents. The generated project is written into the `generated_project/` folder.
-
----
-
-## 🔍 Key Features
-- **Planner**: Turns a user prompt into a structured project plan (name, description, tech stack, files).
-- **Architect**: Breaks the plan into explicit implementation tasks with file paths and detailed instructions.
-- **Coder**: A tool-using REACT-style agent that reads/writes files in `generated_project/` and iteratively completes tasks.
-- Safe file writes: tools enforce writes only under `generated_project/` and prevent path escapes.
+Autocoder is a complete agentic coding platform with a JavaScript/Express backend, a React frontend, Firebase Google login, and persistent history storage. It implements a three‑stage agent pipeline (Planner → Architect → Coder) and exposes it through HTTP APIs so a UI or other clients can drive the agent.
 
 ---
 
-## 🧰 Tech stack & dependencies
-- Python 3.11+
-- Uses: `langgraph`, `langchain`, `langchain-groq`, `pydantic`, `python-dotenv`, and related packages
-(See `[project]` section in `pyproject.toml` for the exact list.)
+## What This Repo Contains
+- **Backend (Express)**: Runs the agent pipeline, provides APIs, and writes code safely to a workspace directory.
+- **Frontend (React + Vite)**: Google login, prompt input, run status, and session history.
+- **Database (SQLite)**: Stores users, sessions, messages, and file changes.
 
 ---
 
-## ⚡ Quick start
-
-1. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   python -m pip install -U pip
-   python -m pip install -e .
-   ```
-
-2. Configure a `.env` with your GROQ API key (or other model credentials):
-   ```
-   GROQ_API_KEY="your_groq_api_key_here"
-   ```
-
-3. Run the agent:
-   ```bash
-   python main.py
-   ```
-   Enter a project prompt when prompted, e.g.:
-   ```
-   Build a colourful modern todo app in html css and js
-   ```
-
-4. Check the generated project:
-   - Outputs are written to `generated_project/` (e.g., `index.html`, `styles.css`, etc.).
-   - Use `agent/tools.py` helper tools (`list_files`, `read_file`, `write_file`) inside the agent to interact with the filesystem safely.
+## Tech Stack
+- **Backend**: Node.js, Express, better-sqlite3, zod
+- **Frontend**: React 18, Vite, Firebase Auth
+- **Database**: SQLite (schema in `backend/src/db/schema.sql`)
+- **LLM Provider**: Groq OpenAI‑compatible API (default)
 
 ---
 
-## 📁 Project structure (important files)
-- `main.py` — CLI entry point (asks for project prompt and invokes the agent).
-- `agent/graph.py` — main pipeline and agent composition (Planner, Architect, Coder).
-- `agent/prompts.py` — prompts for the planner/architect/coder agents.
-- `agent/states.py` — Pydantic models: `Plan`, `TaskPlan`, `ImplementationTask`, `CoderState`.
-- `agent/tools.py` — file and command tools the Coder agent uses; writes to `generated_project/`.
-- `generated_project/` — output folder for created projects.
+## Architecture (High Level)
+1. **Planner**: Turns a user prompt into a structured plan JSON.
+2. **Architect**: Breaks the plan into implementation steps.
+3. **Coder**: Produces file operations, applied safely inside a workspace root.
+4. **History**: Sessions, messages, and file changes are persisted in SQLite.
 
 ---
 
-## How it works (brief)
-1. **Planner**: Uses LLM structured output to create `Plan`.
-2. **Architect**: Converts `Plan` → `TaskPlan` (list of `ImplementationTask` with file paths and descriptions).
-3. **Coder**: For each implementation step, the Coder agent is invoked with a toolset (read/write/list). It edits or creates files under `generated_project/` until all steps complete.
+## Quick Start
+
+### Backend
+```bash
+cd backend
+cp .env.example .env
+npm install
+npm run dev
+```
+Backend default: `http://localhost:4000`
+
+### Frontend
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+Frontend default: `http://localhost:5173`
+
+### Firebase
+Create a Firebase Web App and set the values in `frontend/.env`:
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_APP_ID`
 
 ---
 
-## Development & customization 🔧
-- Modify prompts in `agent/prompts.py` to change planning / coding behavior.
-- Add or extend tools in `agent/tools.py` for additional capabilities (tests, build, run).
-- Swap or configure LLMs in `agent/graph.py` (currently `ChatGroq` is used).
-- Increase `--recursion-limit` via `python main.py -r 200` if your task plan is large.
+## Environment Variables
+
+### Backend (`backend/.env`)
+- `PORT=4000`
+- `CORS_ORIGIN=http://localhost:5173`
+- `DB_PATH=./data/agent.db`
+- `WORKSPACE_ROOT=../workspace`
+- `LLM_MODE=stub` (use `live` to enable the LLM)
+- `LLM_API_KEY=your_groq_api_key_here`
+- `LLM_ENDPOINT=https://api.groq.com/openai/v1/chat/completions`
+- `LLM_MODEL=llama-3.1-70b-versatile`
+
+### Frontend (`frontend/.env`)
+- `VITE_API_BASE_URL=http://localhost:4000`
+- `VITE_FIREBASE_API_KEY=...`
+- `VITE_FIREBASE_AUTH_DOMAIN=...`
+- `VITE_FIREBASE_PROJECT_ID=...`
+- `VITE_FIREBASE_APP_ID=...`
 
 ---
 
-## Security & best practices ⚠️
-> - Never commit API keys. Use `.env` and ensure it’s in `.gitignore`.
-> - The project enforces safe writes to `generated_project/`, but review generated code before running it.
+## API Overview
+- `POST /api/auth/login` — upsert a user
+- `POST /api/agent/run` — run the agent on a prompt
+- `GET /api/history/:userId` — list sessions for a user
+- `GET /api/session/:sessionId` — session messages + file changes
+- `POST /api/files/read` — read a file from the workspace
+- `POST /api/files/write` — write a file to the workspace
+- `GET /api/files/list` — list workspace files
 
 ---
 
-## Example
-- Example prompt used in repository:
-  > "Build a colourful modern todo app in html css and js"
-- After running, you might find files like `generated_project/index.html` and `generated_project/styles.css` (a starting point for the generated app).
+## Database Schema
+Defined in `backend/src/db/schema.sql`.
+- `users`: auth profile
+- `sessions`: each run with prompt/status
+- `messages`: planner/architect/coder payloads
+- `file_changes`: tracked write/delete operations
 
 ---
 
-## Contributing & License
-- Contributions welcome — open issues or PRs with improvements (prompts, tools, tests).
-- Add a license file (e.g., `MIT`) if you want to mark usage terms.
+## Security Notes
+- Never commit `.env` files or API keys.
+- File writes are restricted to the configured workspace root.
+- Review generated code before executing it.
+
+---
+
+## Key Files
+- `backend/src/index.js` — Express entry point
+- `backend/src/agent/agent.js` — agent pipeline
+- `backend/src/agent/prompts.js` — prompts for Planner/Architect/Coder
+- `backend/src/db/schema.sql` — database schema
+- `frontend/src/App.jsx` — auth-aware shell
+- `frontend/src/pages/Login.jsx` — Google login page
+- `frontend/src/pages/Dashboard.jsx` — agent control + history
+
+---
+
+## Example Prompt
+"Build a colourful modern todo app in html css and js"
+
+---
+
+## Contributing
+PRs welcome. Add a license if you want to publish it publicly.
