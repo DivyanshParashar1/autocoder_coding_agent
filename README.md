@@ -1,10 +1,10 @@
-# Autocoder — AI-powered autonomous coding agent 🚀
+# Autocoder — AI-powered autonomous coding agent
 
 **Autocoder** is now a full-stack agent platform with a JavaScript/Express backend and a React frontend. It keeps the core Planner → Architect → Coder flow, but exposes it through HTTP APIs, a Firebase Google login, and a persistent database for user history.
 
 ---
 
-## 🔍 Key Features
+## Key Features
 - **Planner**: Converts a user prompt into a structured plan.
 - **Architect**: Breaks the plan into explicit implementation steps.
 - **Coder**: Produces file operations and edits a safe workspace directory.
@@ -13,7 +13,7 @@
 
 ---
 
-## 🧰 Tech stack & dependencies
+## Tech stack & dependencies
 - Backend: Node.js, Express, better-sqlite3, zod
 - Frontend: React (Vite), Firebase Auth
 - Database: SQLite (schema in `backend/src/db/schema.sql`)
@@ -56,33 +56,8 @@
 
 ---
 
-## How it works (brief)
+## How it works
 1. **Planner**: Produces a plan JSON from the user prompt.
 2. **Architect**: Produces step JSON from the plan.
 3. **Coder**: Produces file operations, safely applied to the workspace root.
 4. **History**: Each session stores prompts, messages, and file changes.
-
----
-
-## Development & customization 🔧
-- Modify prompts in `backend/src/agent/prompts.js` to change planning / coding behavior.
-- Update the workspace root with `WORKSPACE_ROOT` in `backend/.env`.
-- Replace the LLM endpoint with any OpenAI-compatible API via `LLM_ENDPOINT`.
-
----
-
-## Security & best practices ⚠️
-> - Never commit API keys. Use `.env` and ensure it’s in `.gitignore`.
-> - The project enforces safe writes to the workspace directory, but review generated code before running it.
-
----
-
-## Example
-> "Build a colourful modern todo app in html css and js"
-After running, you might find files like `workspace/index.html` and `workspace/styles.css`.
-
----
-
-## Contributing & License
-- Contributions welcome — open issues or PRs with improvements (prompts, tools, tests).
-- Add a license file (e.g., `MIT`) if you want to mark usage terms.
