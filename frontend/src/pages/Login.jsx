@@ -1,21 +1,20 @@
-import React from "react";
 
 export default function Login({ onLogin, error }) {
   return (
     <div className="app-shell">
       <div className="login-card">
-        <div className="badge">Autocoder Agent</div>
-        <h1>Sign in to your coding workspace</h1>
+        <div className="badge">autocoder_agent</div>
+        <h1>Autonomous coding workspace</h1>
         <p>
-          Build projects with an autonomous agent. Use Google to keep your
-          sessions and history synced across devices.
+          An AI agent that writes, modifies, and runs code on your behalf.
+          Sign in to keep your sessions and run history synced.
         </p>
         {error ? <div className="error">{error}</div> : null}
         <button className="primary-btn" onClick={onLogin}>
-          Continue with Google
+          $ auth --provider google
         </button>
         <div className="note">
-          Your agent runs locally with your own model credentials.
+          Agent runs locally. Your own model credentials are used.
         </div>
       </div>
     </div>
