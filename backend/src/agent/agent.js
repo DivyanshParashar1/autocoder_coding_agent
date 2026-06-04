@@ -31,12 +31,16 @@ async function callLLM({ messages, config }) {
     });
   }
 
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${config.apiKey}`,
+  };
+  if (config.siteUrl) headers["HTTP-Referer"] = config.siteUrl;
+  if (config.siteName) headers["X-Title"] = config.siteName;
+
   const res = await fetch(config.endpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.apiKey}`,
-    },
+    headers,
     body: JSON.stringify({
       model: config.model,
       messages,

@@ -24,8 +24,10 @@ const workspaceRoot = ensureWorkspaceRoot(
 const llmConfig = {
   mode: process.env.LLM_MODE || "stub",
   apiKey: process.env.LLM_API_KEY || "",
-  endpoint: process.env.LLM_ENDPOINT || "https://api.groq.com/openai/v1/chat/completions",
-  model: process.env.LLM_MODEL || "llama-3.1-70b-versatile",
+  endpoint: process.env.LLM_ENDPOINT || "https://openrouter.ai/api/v1/chat/completions",
+  model: process.env.LLM_MODEL || "meta-llama/llama-3.1-70b-instruct",
+  siteUrl: process.env.SITE_URL || "",
+  siteName: process.env.SITE_NAME || "autocoder",
 };
 
 app.get("/health", (_req, res) => {
