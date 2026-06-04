@@ -1,16 +1,16 @@
 import express from "express";
 import { z } from "zod";
 import { runAgent } from "../agent/agent.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = express.Router();
 
 const runSchema = z.object({
-  userId: z.string().min(1),
   prompt: z.string().min(1),
 });
 
 export function agentRoutes({ db, workspaceRoot, config }) {
-  router.post("/run", async (req, res) => {
+  router.post("/run", requireAuth, async (req, res) => {
     const parsed = runSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ error: parsed.error.flatten() });
@@ -21,7 +21,7 @@ export function agentRoutes({ db, workspaceRoot, config }) {
         prompt: parsed.data.prompt,
         workspaceRoot,
         db,
-        userId: parsed.data.userId,
+        userId: req.user.id,
         config,
       });
       return res.json(result);

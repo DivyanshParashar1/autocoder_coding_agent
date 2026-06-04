@@ -1,60 +1,22 @@
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { auth, googleProvider } from "./lib/firebase.js";
+import { authClient } from "./lib/auth.js";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
-import { loginUser } from "./lib/api.js";
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
-      setLoading(true);
-      setError("");
-      if (nextUser) {
-        const profile = {
-          id: nextUser.uid,
-          email: nextUser.email,
-          name: nextUser.displayName,
-          photoUrl: nextUser.photoURL,
-          provider: "google",
-        };
-        try {
-          await loginUser(profile);
-        } catch (err) {
-          setError(err.message || "Failed to sync user");
-        }
-        setUser(profile);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const { data: session, isPending, error } = authClient.useSession();
 
   async function handleLogin() {
-    setError("");
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (err) {
-      setError(err.message || "Login failed");
-    }
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    });
   }
 
   async function handleLogout() {
-    setError("");
-    try {
-      await signOut(auth);
-    } catch (err) {
-      setError(err.message || "Logout failed");
-    }
+    await authClient.signOut({ fetchOptions: { onSuccess: () => {} } });
   }
 
-  if (loading) {
+  if (isPending) {
     return (
       <div className="app-shell">
         <div className="loading">Loading...</div>
@@ -62,9 +24,19 @@ export default function App() {
     );
   }
 
+  const user = session?.user
+    ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        photoUrl: session.user.image,
+        provider: "google",
+      }
+    : null;
+
   return user ? (
-    <Dashboard user={user} onLogout={handleLogout} error={error} />
+    <Dashboard user={user} onLogout={handleLogout} />
   ) : (
-    <Login onLogin={handleLogin} error={error} />
+    <Login onLogin={handleLogin} error={error?.message || ""} />
   );
 }

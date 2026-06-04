@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchHistory, runAgent, fetchSession } from "../lib/api.js";
 
-export default function Dashboard({ user, onLogout, error }) {
+export default function Dashboard({ user, onLogout }) {
   const [prompt, setPrompt] = useState("");
   const [history, setHistory] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -13,7 +13,7 @@ export default function Dashboard({ user, onLogout, error }) {
   async function loadHistory() {
     setHistoryError("");
     try {
-      const data = await fetchHistory(user.id);
+      const data = await fetchHistory();
       setHistory(data.sessions || []);
     } catch (err) {
       setHistoryError(err.message || "Failed to load history");
@@ -22,14 +22,14 @@ export default function Dashboard({ user, onLogout, error }) {
 
   useEffect(() => {
     loadHistory();
-  }, [user.id]);
+  }, []);
 
   async function handleRun() {
     if (!prompt.trim()) return;
     setBusy(true);
     setMessage("");
     try {
-      const result = await runAgent({ userId: user.id, prompt });
+      const result = await runAgent({ prompt });
       setMessage(`Session ${result.sessionId} completed.`);
       setPrompt("");
       await loadHistory();
@@ -89,7 +89,6 @@ export default function Dashboard({ user, onLogout, error }) {
           </button>
           {message && <span className="status">{message}</span>}
         </div>
-        {error && <div className="error">{error}</div>}
       </section>
 
       <section className="grid">

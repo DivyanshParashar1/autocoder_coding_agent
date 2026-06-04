@@ -1,20 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
-export async function loginUser(profile) {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(profile),
-  });
-  if (!res.ok) throw new Error("Login failed");
-  return res.json();
-}
-
-export async function runAgent({ userId, prompt }) {
+export async function runAgent({ prompt }) {
   const res = await fetch(`${API_BASE}/api/agent/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, prompt }),
+    credentials: "include",
+    body: JSON.stringify({ prompt }),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -23,14 +14,18 @@ export async function runAgent({ userId, prompt }) {
   return res.json();
 }
 
-export async function fetchHistory(userId) {
-  const res = await fetch(`${API_BASE}/api/history/${userId}`);
+export async function fetchHistory() {
+  const res = await fetch(`${API_BASE}/api/history`, {
+    credentials: "include",
+  });
   if (!res.ok) throw new Error("History fetch failed");
   return res.json();
 }
 
 export async function fetchSession(sessionId) {
-  const res = await fetch(`${API_BASE}/api/session/${sessionId}`);
+  const res = await fetch(`${API_BASE}/api/session/${sessionId}`, {
+    credentials: "include",
+  });
   if (!res.ok) throw new Error("Session fetch failed");
   return res.json();
 }

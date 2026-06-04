@@ -1,23 +1,11 @@
--- SQLite schema for users, sessions, messages, and file changes
-PRAGMA foreign_keys = ON;
-
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  email TEXT,
-  name TEXT,
-  photo_url TEXT,
-  provider TEXT,
-  created_at TEXT NOT NULL,
-  last_login_at TEXT NOT NULL
-);
+-- Application tables (better-auth manages its own user/session/account tables)
 
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
   prompt TEXT NOT NULL,
   status TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id)
+  created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS messages (
