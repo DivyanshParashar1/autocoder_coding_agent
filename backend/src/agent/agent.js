@@ -17,7 +17,10 @@ function safeJsonParse(text, fallback) {
 }
 
 async function callLLM({ messages, config }) {
-  if (config.mode === "stub" || !config.apiKey || !config.endpoint) {
+  const isOllama = config.mode === "ollama";
+  const isReady = isOllama ? !!config.endpoint : (config.apiKey && config.endpoint);
+
+  if (config.mode === "stub" || !isReady) {
     return JSON.stringify({
       summary: "Stub plan",
       goals: ["Add provider credentials", "Run agent"],
@@ -31,12 +34,12 @@ async function callLLM({ messages, config }) {
     });
   }
 
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${config.apiKey}`,
-  };
-  if (config.siteUrl) headers["HTTP-Referer"] = config.siteUrl;
-  if (config.siteName) headers["X-Title"] = config.siteName;
+  const headers = { "Content-Type": "application/json" };
+  if (!isOllama) {
+    headers["Authorization"] = `Bearer ${config.apiKey}`;
+    if (config.siteUrl) headers["HTTP-Referer"] = config.siteUrl;
+    if (config.siteName) headers["X-Title"] = config.siteName;
+  }
 
   const res = await fetch(config.endpoint, {
     method: "POST",

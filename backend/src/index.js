@@ -36,11 +36,16 @@ const workspaceRoot = ensureWorkspaceRoot(
   process.env.WORKSPACE_ROOT || path.resolve("../workspace")
 );
 
+const isOllamaMode = (process.env.LLM_MODE || "stub") === "ollama";
 const llmConfig = {
   mode: process.env.LLM_MODE || "stub",
   apiKey: process.env.LLM_API_KEY || "",
-  endpoint: process.env.LLM_ENDPOINT || "https://openrouter.ai/api/v1/chat/completions",
-  model: process.env.LLM_MODEL || "meta-llama/llama-3.1-70b-instruct",
+  endpoint: process.env.LLM_ENDPOINT || (
+    isOllamaMode
+      ? `http://${process.env.OLLAMA_HOST || "localhost:11434"}/v1/chat/completions`
+      : "https://openrouter.ai/api/v1/chat/completions"
+  ),
+  model: process.env.LLM_MODEL || (isOllamaMode ? "llama3.2" : "meta-llama/llama-3.1-70b-instruct"),
   siteUrl: process.env.SITE_URL || "",
   siteName: process.env.SITE_NAME || "autocoder",
 };
